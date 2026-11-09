@@ -8,6 +8,9 @@
     <meta name="theme-color" content="#090914">
     <meta name="description" content="AmbientDesk - Your personal ambient dashboard. A beautiful live clock, weather, music, focus timer and more.">
 
+    <meta name="keywords" content="AmbientDesk, ambient dashboard, live clock, music player, focus timer, weather dashboard">
+    <meta name="author" content="AmbientDesk">
+
     <title>AmbientDesk — Your Space, Your Atmosphere</title>
 
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -35,7 +38,7 @@
     <!-- Main Application -->
     <main id="app">
 
-        <!-- Top Navigation -->
+        <!-- TOP NAVIGATION -->
         <header class="topbar">
 
             <div class="brand">
@@ -51,18 +54,24 @@
 
             <div class="topbar-actions">
 
-                <button class="icon-btn" id="display-mode-btn"
-                    title="Display mode">
+                <button class="icon-btn"
+                    id="display-mode-btn"
+                    title="Display mode"
+                    aria-label="Toggle display mode">
                     <i data-lucide="monitor"></i>
                 </button>
 
-                <button class="icon-btn" id="fullscreen-btn"
-                    title="Fullscreen">
+                <button class="icon-btn"
+                    id="fullscreen-btn"
+                    title="Fullscreen"
+                    aria-label="Toggle fullscreen">
                     <i data-lucide="maximize"></i>
                 </button>
 
-                <button class="icon-btn" id="settings-btn"
-                    title="Settings">
+                <button class="icon-btn"
+                    id="settings-btn"
+                    title="Settings"
+                    aria-label="Open settings">
                     <i data-lucide="settings-2"></i>
                 </button>
 
@@ -70,13 +79,13 @@
         </header>
 
 
-        <!-- Dashboard Content -->
+        <!-- DASHBOARD CONTENT -->
         <section class="dashboard">
 
-            <!-- Left Information -->
+            <!-- LEFT INFORMATION PANEL -->
             <aside class="side-panel">
 
-                <!-- Calendar Widget -->
+                <!-- CALENDAR WIDGET -->
                 <article class="widget calendar-widget" id="calendar-widget">
 
                     <div class="widget-heading">
@@ -97,7 +106,7 @@
                 </article>
 
 
-                <!-- Weather Widget -->
+                <!-- WEATHER WIDGET -->
                 <article class="widget weather-widget" id="weather-widget">
 
                     <div class="widget-heading">
@@ -117,14 +126,18 @@
                                 <sup>°C</sup>
                             </div>
 
-                            <p id="weather-description">Checking weather...</p>
+                            <p id="weather-description">
+                                Checking weather...
+                            </p>
                         </div>
 
                     </div>
 
                     <div class="weather-location">
                         <i data-lucide="map-pin"></i>
-                        <span id="weather-location">Detecting location...</span>
+                        <span id="weather-location">
+                            Detecting location...
+                        </span>
                     </div>
 
                     <div class="weather-details">
@@ -153,13 +166,14 @@
             </aside>
 
 
-            <!-- Center Display -->
+            <!-- CENTER DISPLAY -->
             <section class="main-display">
 
                 <div class="greeting" id="greeting">
                     GOOD MORNING
                 </div>
 
+                <!-- LIVE CLOCK -->
                 <div class="clock-container">
 
                     <div class="clock" id="clock">
@@ -197,7 +211,7 @@
                 </div>
 
 
-                <!-- Audio Visualizer -->
+                <!-- AUDIO VISUALIZER -->
                 <div class="visualizer-container">
 
                     <div class="visualizer" id="visualizer">
@@ -211,7 +225,7 @@
                 </div>
 
 
-                <!-- Focus Timer -->
+                <!-- FOCUS TIMER -->
                 <article class="widget focus-widget" id="focus-widget">
 
                     <div class="widget-heading">
@@ -229,7 +243,8 @@
 
                     <div class="focus-controls">
 
-                        <button class="icon-btn" id="focus-reset"
+                        <button class="icon-btn"
+                            id="focus-reset"
                             title="Reset timer">
                             <i data-lucide="rotate-ccw"></i>
                         </button>
@@ -239,7 +254,8 @@
                             START
                         </button>
 
-                        <button class="icon-btn" id="focus-mode-btn"
+                        <button class="icon-btn"
+                            id="focus-mode-btn"
                             title="Switch focus mode">
                             <i data-lucide="repeat"></i>
                         </button>
@@ -251,10 +267,10 @@
             </section>
 
 
-            <!-- Right Information -->
+            <!-- RIGHT INFORMATION PANEL -->
             <aside class="side-panel right-panel">
 
-                <!-- Music Player -->
+                <!-- MUSIC PLAYER -->
                 <article class="widget music-widget" id="music-widget">
 
                     <div class="widget-heading">
@@ -262,54 +278,205 @@
                         <i data-lucide="radio"></i>
                     </div>
 
+
+                    <!-- ALBUM ART -->
                     <div class="album-art" id="album-art">
+
                         <div class="album-glow"></div>
+
                         <i data-lucide="headphones"></i>
+
                     </div>
 
+
+                    <!-- TRACK INFORMATION -->
                     <div class="music-information">
-                        <h3 id="track-name">Ambient Dreams</h3>
-                        <p id="track-artist">AmbientDesk Radio</p>
+
+                        <h3 id="track-name">
+                            No music selected
+                        </h3>
+
+                        <p id="track-artist">
+                            Add songs from your device
+                        </p>
+
                     </div>
 
+
+                    <!-- MUSIC STATUS -->
+                    <div class="music-status" id="music-status">
+                        Add music to begin
+                    </div>
+
+
+                    <!-- MUSIC PROGRESS -->
                     <div class="music-progress">
+
                         <span id="music-current">0:00</span>
 
-                        <input type="range" id="music-progress"
-                            min="0" max="100" value="0">
+                        <input
+                            type="range"
+                            id="music-progress"
+                            min="0"
+                            max="100"
+                            value="0"
+                            aria-label="Music progress"
+                        >
 
                         <span id="music-duration">0:00</span>
+
                     </div>
 
+
+                    <!-- PLAYBACK CONTROLS -->
                     <div class="music-controls">
 
-                        <button class="icon-btn" id="music-previous">
+                        <button
+                            class="icon-btn"
+                            id="music-previous"
+                            title="Previous track"
+                            aria-label="Previous track">
                             <i data-lucide="skip-back"></i>
                         </button>
 
-                        <button class="music-play" id="music-play">
+                        <button
+                            class="music-play"
+                            id="music-play"
+                            title="Play music"
+                            aria-label="Play music">
                             <i data-lucide="play"></i>
                         </button>
 
-                        <button class="icon-btn" id="music-next">
+                        <button
+                            class="icon-btn"
+                            id="music-next"
+                            title="Next track"
+                            aria-label="Next track">
                             <i data-lucide="skip-forward"></i>
                         </button>
 
                     </div>
 
+
+                    <!-- VOLUME -->
                     <div class="music-volume">
+
                         <i data-lucide="volume-1"></i>
 
-                        <input type="range" id="music-volume"
-                            min="0" max="100" value="60">
+                        <input
+                            type="range"
+                            id="music-volume"
+                            min="0"
+                            max="100"
+                            value="60"
+                            aria-label="Volume"
+                        >
+
                     </div>
 
-                    <audio id="audio-player" crossorigin="anonymous"></audio>
+
+                    <!-- MUSIC LIBRARY -->
+                    <div class="music-library">
+
+                        <div class="music-library-heading">
+
+                            <span>YOUR PLAYLIST</span>
+
+                            <span id="playlist-count">
+                                0 TRACKS
+                            </span>
+
+                        </div>
+
+
+                        <!-- MUSIC ACTIONS -->
+                        <div class="music-library-actions">
+
+                            <button
+                                type="button"
+                                id="music-add"
+                                class="music-add-button">
+
+                                <i data-lucide="plus"></i>
+
+                                Add Music
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                id="music-shuffle"
+                                class="music-small-button"
+                                title="Shuffle"
+                                aria-label="Toggle shuffle">
+
+                                <i data-lucide="shuffle"></i>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                id="music-repeat"
+                                class="music-small-button"
+                                title="Repeat off"
+                                aria-label="Change repeat mode">
+
+                                <i data-lucide="repeat"></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- LOCAL MUSIC FILE SELECTOR -->
+                        <input
+                            type="file"
+                            id="music-file-input"
+                            accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus"
+                            multiple
+                            hidden
+                        >
+
+
+                        <!-- PLAYLIST -->
+                        <div
+                            id="music-playlist"
+                            class="music-playlist">
+
+                            <p class="playlist-empty">
+                                Your playlist is empty.
+                                Add music to get started.
+                            </p>
+
+                        </div>
+
+
+                        <!-- CLEAR PLAYLIST -->
+                        <button
+                            type="button"
+                            id="music-clear"
+                            class="music-clear-button">
+
+                            Clear playlist
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- IMPORTANT: KEEP ONLY ONE AUDIO ELEMENT -->
+                    <audio
+                        id="audio-player"
+                        crossorigin="anonymous"
+                        preload="metadata">
+                    </audio>
 
                 </article>
 
 
-                <!-- Quick Controls -->
+                <!-- QUICK CONTROLS -->
                 <article class="widget controls-widget">
 
                     <div class="widget-heading">
@@ -317,41 +484,69 @@
                         <i data-lucide="sliders-horizontal"></i>
                     </div>
 
+
+                    <!-- MATRIX RAIN -->
                     <div class="quick-control" id="matrix-control">
+
                         <div>
                             <i data-lucide="binary"></i>
                             <span>Matrix Rain</span>
                         </div>
 
                         <label class="switch">
-                            <input type="checkbox" id="matrix-toggle">
+
+                            <input
+                                type="checkbox"
+                                id="matrix-toggle">
+
                             <span class="switch-slider"></span>
+
                         </label>
+
                     </div>
 
+
+                    <!-- VISUALIZER -->
                     <div class="quick-control" id="visualizer-control">
+
                         <div>
                             <i data-lucide="audio-lines"></i>
                             <span>Visualizer</span>
                         </div>
 
                         <label class="switch">
-                            <input type="checkbox" id="visualizer-toggle"
+
+                            <input
+                                type="checkbox"
+                                id="visualizer-toggle"
                                 checked>
+
                             <span class="switch-slider"></span>
+
                         </label>
+
                     </div>
 
+
+                    <!-- AMBIENT GLOW -->
                     <div class="quick-control">
+
                         <div>
                             <i data-lucide="moon"></i>
                             <span>Ambient Glow</span>
                         </div>
 
                         <label class="switch">
-                            <input type="checkbox" id="glow-toggle" checked>
+
+                            <input
+                                type="checkbox"
+                                id="glow-toggle"
+                                checked>
+
                             <span class="switch-slider"></span>
+
                         </label>
+
                     </div>
 
                 </article>
@@ -361,47 +556,69 @@
         </section>
 
 
-        <!-- Bottom Toolbar -->
+        <!-- BOTTOM TOOLBAR -->
         <footer class="bottom-bar">
 
             <div class="system-status">
+
                 <span class="status-dot"></span>
+
                 <span>AMBIENT SYSTEM ONLINE</span>
+
             </div>
 
+
+            <!-- THEME SELECTOR -->
             <div class="theme-selector">
 
                 <span>ATMOSPHERE</span>
 
-                <button class="theme-btn active"
+                <button
+                    class="theme-btn active"
                     data-theme-choice="cyberpunk"
                     title="Cyberpunk">
+
                     <span class="theme-dot cyber-dot"></span>
+
                 </button>
 
-                <button class="theme-btn"
+                <button
+                    class="theme-btn"
                     data-theme-choice="cozy"
                     title="Cozy">
+
                     <span class="theme-dot cozy-dot"></span>
+
                 </button>
 
-                <button class="theme-btn"
+                <button
+                    class="theme-btn"
                     data-theme-choice="matrix"
                     title="Matrix">
+
                     <span class="theme-dot matrix-dot"></span>
+
                 </button>
 
-                <button class="theme-btn"
+                <button
+                    class="theme-btn"
                     data-theme-choice="minimal"
                     title="Minimal">
+
                     <span class="theme-dot minimal-dot"></span>
+
                 </button>
 
             </div>
 
+
+            <!-- SHARE BUTTON -->
             <button class="share-btn" id="share-btn">
+
                 <i data-lucide="share-2"></i>
+
                 SHARE DISPLAY
+
             </button>
 
         </footer>
@@ -409,75 +626,148 @@
     </main>
 
 
-    <!-- Settings Panel -->
-    <div class="modal-backdrop" id="settings-backdrop">
+    <!-- SETTINGS PANEL -->
+    <div
+        class="modal-backdrop"
+        id="settings-backdrop"
+        aria-hidden="true">
 
-        <section class="settings-panel" id="settings-panel">
+        <section
+            class="settings-panel"
+            id="settings-panel">
 
             <div class="settings-header">
+
                 <div>
                     <h2>Dashboard Settings</h2>
                     <p>Make this space yours.</p>
                 </div>
 
-                <button class="icon-btn" id="close-settings">
+                <button
+                    class="icon-btn"
+                    id="close-settings"
+                    aria-label="Close settings">
+
                     <i data-lucide="x"></i>
+
                 </button>
+
             </div>
+
 
             <div class="settings-content">
 
+
+                <!-- CLOCK SETTINGS -->
                 <div class="setting-group">
+
                     <h3>Clock Preferences</h3>
 
                     <label class="setting-option">
+
                         24-hour clock
-                        <input type="checkbox" id="24-hour-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="24-hour-toggle">
+
                     </label>
+
 
                     <label class="setting-option">
+
                         Show seconds
-                        <input type="checkbox" id="seconds-toggle" checked>
+
+                        <input
+                            type="checkbox"
+                            id="seconds-toggle"
+                            checked>
+
                     </label>
+
                 </div>
 
+
+                <!-- DISPLAY SETTINGS -->
                 <div class="setting-group">
+
                     <h3>Display Preferences</h3>
 
                     <label class="setting-option">
+
                         Show weather
-                        <input type="checkbox" id="show-weather" checked>
+
+                        <input
+                            type="checkbox"
+                            id="show-weather"
+                            checked>
+
                     </label>
 
+
                     <label class="setting-option">
+
                         Show calendar
-                        <input type="checkbox" id="show-calendar" checked>
+
+                        <input
+                            type="checkbox"
+                            id="show-calendar"
+                            checked>
+
                     </label>
 
+
                     <label class="setting-option">
+
                         Show music player
-                        <input type="checkbox" id="show-music" checked>
+
+                        <input
+                            type="checkbox"
+                            id="show-music"
+                            checked>
+
                     </label>
 
+
                     <label class="setting-option">
+
                         Screen dimming
-                        <input type="checkbox" id="screen-dimming">
+
+                        <input
+                            type="checkbox"
+                            id="screen-dimming">
+
                     </label>
+
                 </div>
 
+
+                <!-- APPEARANCE SETTINGS -->
                 <div class="setting-group">
+
                     <h3>Appearance</h3>
 
                     <label for="brightness-control">
                         Display brightness
                     </label>
 
-                    <input type="range" id="brightness-control"
-                        min="50" max="100" value="100">
+                    <input
+                        type="range"
+                        id="brightness-control"
+                        min="50"
+                        max="100"
+                        value="100">
+
                 </div>
 
-                <button class="reset-settings" id="reset-settings">
+
+                <!-- RESET -->
+                <button
+                    class="reset-settings"
+                    id="reset-settings">
+
                     Reset all settings
+
                 </button>
 
             </div>
@@ -487,37 +777,68 @@
     </div>
 
 
-    <!-- Share Dialog -->
-    <div class="modal-backdrop" id="share-backdrop">
+    <!-- SHARE DIALOG -->
+    <div
+        class="modal-backdrop"
+        id="share-backdrop"
+        aria-hidden="true">
 
         <section class="share-panel">
 
             <div class="settings-header">
+
                 <div>
                     <h2>Share Your Atmosphere</h2>
                     <p>Let someone experience your setup.</p>
                 </div>
 
-                <button class="icon-btn" id="close-share">
+                <button
+                    class="icon-btn"
+                    id="close-share"
+                    aria-label="Close sharing">
+
                     <i data-lucide="x"></i>
+
                 </button>
+
             </div>
 
+
+            <!-- SHARE PREVIEW -->
             <div class="share-preview">
+
                 <div class="share-preview-icon">
                     <i data-lucide="orbit"></i>
                 </div>
 
                 <h3>AmbientDesk</h3>
-                <p id="share-theme-name">Cyberpunk Atmosphere</p>
+
+                <p id="share-theme-name">
+                    Cyberpunk Atmosphere
+                </p>
+
             </div>
 
-            <input type="text" id="share-url" readonly>
 
-            <button class="focus-start share-copy" id="copy-share-url">
+            <!-- SHARE URL -->
+            <input
+                type="text"
+                id="share-url"
+                readonly
+                aria-label="Share URL">
+
+
+            <!-- COPY BUTTON -->
+            <button
+                class="focus-start share-copy"
+                id="copy-share-url">
+
                 <i data-lucide="copy"></i>
+
                 COPY WIDGET URL
+
             </button>
+
 
             <div id="share-feedback"></div>
 
@@ -528,11 +849,24 @@
     </div>
 
 
-    <!-- Toast Notifications -->
-    <div class="toast" id="toast"></div>
+    <!-- TOAST NOTIFICATIONS -->
+    <div
+        class="toast"
+        id="toast"
+        role="status"
+        aria-live="polite">
+    </div>
 
 
-    <!-- Main JavaScript Entry -->
+    <!-- ICON INITIALIZATION -->
+    <script>
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
+
+
+    <!-- MAIN JAVASCRIPT ENTRY -->
     <script type="module" src="js/app.js"></script>
 
 </body>
