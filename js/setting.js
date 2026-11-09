@@ -1,129 +1,142 @@
-// ============================================
-// AmbientDesk — Settings
-// ============================================
+/* =========================================
+   AMBIENTDESK — SETTINGS
+   File: js/setting.js
+========================================= */
 
 export function initSettings(app) {
-    const settingsButton = document.getElementById("settings-button");
-    const settingsModal = document.getElementById("settings-modal");
-    const closeButton = document.getElementById("close-settings");
+    const $ = id => document.getElementById(id);
 
-    const hourToggle = document.getElementById("24-hour-toggle");
-    const secondsToggle = document.getElementById("seconds-toggle");
+    const backdrop = $("settings-backdrop");
+    const openButton = $("settings-btn");
+    const closeButton = $("close-settings");
+    const resetButton = $("reset-settings");
 
-    const weatherToggle = document.getElementById("show-weather");
-    const calendarToggle = document.getElementById("show-calendar");
-    const musicToggle = document.getElementById("show-music");
+    const controls = {
+        use24Hour: $("24-hour-toggle"),
+        showSeconds: $("seconds-toggle"),
+        showWeather: $("show-weather"),
+        showCalendar: $("show-calendar"),
+        showMusic: $("show-music"),
+        screenDimming: $("screen-dimming"),
+        brightness: $("brightness-control")
+    };
 
-    const dimmingToggle = document.getElementById("screen-dimming");
-    const brightnessControl = document.getElementById("brightness-control");
-
-    const resetButton = document.getElementById("reset-settings");
-
-    function getSettings() {
-        return app.getSettings();
+    function open() {
+        backdrop?.classList.add("active");
+        backdrop?.setAttribute("aria-hidden", "false");
     }
 
-    function saveSetting(key, value) {
-        const settings = getSettings();
+    function close() {
+        backdrop?.classList.remove("active");
+        backdrop?.setAttribute("aria-hidden", "true");
+    }
 
+    function load() {
+        const settings = app.getSettings();
+
+        if (controls.use24Hour) {
+            controls.use24Hour.checked = Boolean(settings.use24Hour);
+        }
+
+        if (controls.showSeconds) {
+            controls.showSeconds.checked = settings.showSeconds !== false;
+        }
+
+        if (controls.showWeather) {
+            controls.showWeather.checked = settings.showWeather !== false;
+        }
+
+        if (controls.showCalendar) {
+            controls.showCalendar.checked = settings.showCalendar !== false;
+        }
+
+        if (controls.showMusic) {
+            controls.showMusic.checked = settings.showMusic !== false;
+        }
+
+        if (controls.screenDimming) {
+            controls.screenDimming.checked = Boolean(settings.screenDimming);
+        }
+
+        if (controls.brightness) {
+            controls.brightness.value = settings.brightness ?? 100;
+        }
+    }
+
+    function updateSetting(key, value) {
+        const settings = app.getSettings();
         settings[key] = value;
 
         app.updateSettings(settings);
-    }
 
-    function openSettings() {
-        if (!settingsModal) return;
+        if (key === "use24Hour") {
+            app.modules.clock?.set24Hour?.(value);
+        }
 
-        settingsModal.classList.add("active");
-        settingsModal.setAttribute("aria-hidden", "false");
-    }
+        if (key === "showSeconds") {
+            app.modules.clock?.setShowSeconds?.(value);
+        }
 
-    function closeSettings() {
-        if (!settingsModal) return;
+        if (key === "screenDimming") {
+            app.setScreenDimming(value);
+        }
 
-        settingsModal.classList.remove("active");
-        settingsModal.setAttribute("aria-hidden", "true");
-    }
-
-    function loadSettings() {
-        const settings = getSettings();
-
-        if (hourToggle) hourToggle.checked = Boolean(settings.use24Hour);
-        if (secondsToggle) secondsToggle.checked = settings.showSeconds !== false;
-
-        if (weatherToggle) weatherToggle.checked = settings.showWeather !== false;
-        if (calendarToggle) calendarToggle.checked = settings.showCalendar !== false;
-        if (musicToggle) musicToggle.checked = settings.showMusic !== false;
-
-        if (dimmingToggle) dimmingToggle.checked = Boolean(settings.screenDimming);
-
-        if (brightnessControl) {
-            brightnessControl.value = settings.brightness ?? 100;
+        if (key === "brightness") {
+            app.setBrightness(value);
         }
     }
 
-    settingsButton?.addEventListener("click", openSettings);
-    closeButton?.addEventListener("click", closeSettings);
+    openButton?.addEventListener("click", open);
+    closeButton?.addEventListener("click", close);
 
-    settingsModal?.addEventListener("click", (event) => {
-        if (event.target === settingsModal) {
-            closeSettings();
-        }
+    backdrop?.addEventListener("click", event => {
+        if (event.target === backdrop) close();
     });
 
-    hourToggle?.addEventListener("change", () => {
-        saveSetting("use24Hour", hourToggle.checked);
-        app.modules.clock?.set24Hour(hourToggle.checked);
+    controls.use24Hour?.addEventListener("change", event => {
+        updateSetting("use24Hour", event.target.checked);
     });
 
-    secondsToggle?.addEventListener("change", () => {
-        saveSetting("showSeconds", secondsToggle.checked);
-        app.modules.clock?.setShowSeconds(secondsToggle.checked);
+    controls.showSeconds?.addEventListener("change", event => {
+        updateSetting("showSeconds", event.target.checked);
     });
 
-    weatherToggle?.addEventListener("change", () => {
-        saveSetting("showWeather", weatherToggle.checked);
-        app.setWidgetVisibility("weather", weatherToggle.checked);
+    controls.showWeather?.addEventListener("change", event => {
+        updateSetting("showWeather", event.target.checked);
     });
 
-    calendarToggle?.addEventListener("change", () => {
-        saveSetting("showCalendar", calendarToggle.checked);
-        app.setWidgetVisibility("calendar", calendarToggle.checked);
+    controls.showCalendar?.addEventListener("change", event => {
+        updateSetting("showCalendar", event.target.checked);
     });
 
-    musicToggle?.addEventListener("change", () => {
-        saveSetting("showMusic", musicToggle.checked);
-        app.setWidgetVisibility("music", musicToggle.checked);
+    controls.showMusic?.addEventListener("change", event => {
+        updateSetting("showMusic", event.target.checked);
     });
 
-    dimmingToggle?.addEventListener("change", () => {
-        saveSetting("screenDimming", dimmingToggle.checked);
-        app.setScreenDimming(dimmingToggle.checked);
+    controls.screenDimming?.addEventListener("change", event => {
+        updateSetting("screenDimming", event.target.checked);
     });
 
-    brightnessControl?.addEventListener("input", () => {
-        const value = Number(brightnessControl.value);
-
-        saveSetting("brightness", value);
-        app.setBrightness(value);
+    controls.brightness?.addEventListener("input", event => {
+        updateSetting("brightness", Number(event.target.value));
     });
 
     resetButton?.addEventListener("click", () => {
         app.resetSettings();
-        loadSettings();
-
-        app.showToast("Settings restored to default.");
+        load();
+        close();
     });
 
-    loadSettings();
+    load();
 
     return {
-        open: openSettings,
-        close: closeSettings,
+        open,
+        close,
+        load,
 
         destroy() {
-            settingsButton?.removeEventListener("click", openSettings);
-            closeButton?.removeEventListener("click", closeSettings);
+            openButton?.removeEventListener("click", open);
+            closeButton?.removeEventListener("click", close);
         }
     };
 }
