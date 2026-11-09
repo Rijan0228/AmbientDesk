@@ -1,6 +1,5 @@
 /* =========================================
-   AMBIENTDESK
-   Main Application Controller
+   AMBIENTDESK — MAIN APPLICATION
    File: js/app.js
 ========================================= */
 
@@ -11,628 +10,360 @@ import { initVisualizer } from "./visualizer.js";
 import { initMatrix } from "./matrix.js";
 import { initFocus } from "./focus.js";
 import { initCalendar } from "./calendar.js";
-import { initSettings } from "./settings.js";
+import { initSettings } from "./setting.js";
 import { initSharing } from "./sharing.js";
 
-
-/* =========================================
-   APPLICATION STATE
-========================================= */
+const DEFAULT_SETTINGS = {
+    theme: "cyberpunk",
+    displayMode: false,
+    matrixEnabled: false,
+    visualizerEnabled: true,
+    glowEnabled: true,
+    use24Hour: false,
+    showSeconds: true,
+    showWeather: true,
+    showCalendar: true,
+    showMusic: true,
+    screenDimming: false,
+    brightness: 100
+};
 
 const AmbientDesk = {
-
-    version: "1.0.0",
-
+    version: "1.1.0",
     initialized: false,
-
-    settings: {
-        theme: "cyberpunk",
-        displayMode: false,
-        matrixEnabled: false,
-        visualizerEnabled: true,
-        glowEnabled: true
-    },
-
+    settings: { ...DEFAULT_SETTINGS },
     modules: {},
+    toastTimeout: null,
 
     init() {
-
         if (this.initialized) return;
 
-        console.log(
-            "%c AmbientDesk ",
-            "background:#a855f7;color:white;font-size:18px;font-weight:bold;padding:8px;"
-        );
-
-        console.log("Starting AmbientDesk...");
-
         this.loadSavedPreferences();
+        this.applySettings();
 
         this.initializeModules();
-
         this.initializeGlobalControls();
-
         this.initializeKeyboardShortcuts();
-
-        this.initializeDisplayMode();
-
-        this.initializeTooltips();
 
         this.initialized = true;
 
-        console.log("AmbientDesk initialized successfully.");
-
         this.showToast("AmbientDesk is ready!");
 
+        console.log("AmbientDesk initialized.");
     },
-
-
-    /* =====================================
-       LOAD SAVED PREFERENCES
-    ===================================== */
 
     loadSavedPreferences() {
-
         try {
+            const saved = localStorage.getItem("ambientdesk-settings");
 
-            const saved = localStorage.getItem(
-                "ambientdesk-settings"
-            );
-
-            if (!saved) return;
-
-            const preferences = JSON.parse(saved);
-
-            this.settings = {
-                ...this.settings,
-                ...preferences
-            };
-
-            if (this.settings.theme) {
-
-                document.body.dataset.theme =
-                    this.settings.theme;
-
+            if (saved) {
+                this.settings = {
+                    ...DEFAULT_SETTINGS,
+                    ...JSON.parse(saved)
+                };
             }
-
         } catch (error) {
-
-            console.warn(
-                "Could not load saved preferences:",
-                error
-            );
-
+            console.warn("Could not load preferences:", error);
+            this.settings = { ...DEFAULT_SETTINGS };
         }
 
+        const params = new URLSearchParams(location.search);
+        const sharedTheme = params.get("theme");
+
+        if (["cyberpunk", "cozy", "matrix", "minimal"].includes(sharedTheme)) {
+            this.settings.theme = sharedTheme;
+        }
     },
 
-
-    /* =====================================
-       SAVE PREFERENCES
-    ===================================== */
-
     savePreferences() {
-
         try {
-
             localStorage.setItem(
                 "ambientdesk-settings",
                 JSON.stringify(this.settings)
             );
-
         } catch (error) {
-
-            console.warn(
-                "Could not save preferences:",
-                error
-            );
-
+            console.warn("Could not save preferences:", error);
         }
-
     },
 
+    applySettings() {
+        document.body.dataset.theme = this.settings.theme;
 
-    /* =====================================
-       INITIALIZE MODULES
-    ===================================== */
+        document.body.classList.toggle(
+            "glow-disabled",
+            !this.settings.glowEnabled
+        );
+
+        this.setBrightness(this.settings.brightness);
+        this.setScreenDimming(this.settings.screenDimming);
+
+        this.setWidgetVisibility("weather", this.settings.showWeather);
+        this.setWidgetVisibility("calendar", this.settings.showCalendar);
+        this.setWidgetVisibility("music", this.settings.showMusic);
+
+        document.body.classList.toggle(
+            "display-mode",
+            this.settings.displayMode
+        );
+
+        const matrixToggle = document.getElementById("matrix-toggle");
+        const visualizerToggle = document.getElementById("visualizer-toggle");
+        const glowToggle = document.getElementById("glow-toggle");
+
+        if (matrixToggle) matrixToggle.checked = this.settings.matrixEnabled;
+        if (visualizerToggle) visualizerToggle.checked = this.settings.visualizerEnabled;
+        if (glowToggle) glowToggle.checked = this.settings.glowEnabled;
+
+        document.querySelectorAll("[data-theme-choice]").forEach(button => {
+            const active = button.dataset.themeChoice === this.settings.theme;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
+    },
 
     initializeModules() {
-
-        const modules = [
-
-            ["clock", initClock],
-
-            ["weather", initWeather],
-
-            ["music", initMusic],
-
-            ["visualizer", initVisualizer],
-
-            ["matrix", initMatrix],
-
-            ["focus", initFocus],
-
-            ["calendar", initCalendar],
-
-            ["settings", initSettings],
-
-            ["sharing", initSharing]
-
+        const initializers = [
+            ["clock", () => initClock()],
+            ["weather", () => initWeather()],
+            ["music", () => initMusic()],
+            ["visualizer", () => initVisualizer()],
+            ["matrix", () => initMatrix()],
+            ["focus", () => initFocus()],
+            ["calendar", () => initCalendar()],
+            ["settings", () => initSettings(this)],
+            ["sharing", () => initSharing(this)]
         ];
 
-
-        modules.forEach(([name, initialize]) => {
-
+        for (const [name, initialize] of initializers) {
             try {
-
                 this.modules[name] = initialize();
-
-                console.log(
-                    `${name} module initialized.`
-                );
-
             } catch (error) {
-
-                console.error(
-                    `Failed to initialize ${name}:`,
-                    error
-                );
-
+                console.error(`Could not initialize ${name}:`, error);
             }
+        }
 
-        });
-
+        this.modules.clock?.set24Hour?.(this.settings.use24Hour);
+        this.modules.clock?.setShowSeconds?.(this.settings.showSeconds);
+        this.modules.matrix?.setEnabled?.(this.settings.matrixEnabled);
+        this.modules.visualizer?.setEnabled?.(this.settings.visualizerEnabled);
     },
-
-
-    /* =====================================
-       GLOBAL CONTROLS
-    ===================================== */
 
     initializeGlobalControls() {
-
-        /* Theme buttons */
-
-        document.querySelectorAll(
-            "[data-theme-choice]"
-        ).forEach(button => {
-
+        document.querySelectorAll("[data-theme-choice]").forEach(button => {
             button.addEventListener("click", () => {
-
-                const theme =
-                    button.dataset.themeChoice;
-
-                this.setTheme(theme);
-
+                this.setTheme(button.dataset.themeChoice);
             });
-
         });
 
-
-        /* Display mode */
-
-        const displayButton =
-            document.getElementById("display-mode-btn");
-
-        if (displayButton) {
-
-            displayButton.addEventListener(
-                "click",
-                () => this.toggleDisplayMode()
-            );
-
-        }
-
-
-        /* Fullscreen */
-
-        const fullscreenButton =
-            document.getElementById("fullscreen-btn");
-
-        if (fullscreenButton) {
-
-            fullscreenButton.addEventListener(
-                "click",
-                () => this.toggleFullscreen()
-            );
-
-        }
-
-
-        /* Matrix toggle */
-
-        const matrixToggle =
-            document.getElementById("matrix-toggle");
-
-        if (matrixToggle) {
-
-            matrixToggle.addEventListener(
-                "change",
-                event => {
-
-                    this.settings.matrixEnabled =
-                        event.target.checked;
-
-                    this.modules.matrix?.setEnabled?.(
-                        event.target.checked
-                    );
-
-                    this.savePreferences();
-
-                }
-            );
-
-        }
-
-
-        /* Visualizer toggle */
-
-        const visualizerToggle =
-            document.getElementById("visualizer-toggle");
-
-        if (visualizerToggle) {
-
-            visualizerToggle.addEventListener(
-                "change",
-                event => {
-
-                    this.settings.visualizerEnabled =
-                        event.target.checked;
-
-                    this.modules.visualizer?.setEnabled?.(
-                        event.target.checked
-                    );
-
-                    this.savePreferences();
-
-                }
-            );
-
-        }
-
-
-        /* Glow toggle */
-
-        const glowToggle =
-            document.getElementById("glow-toggle");
-
-        if (glowToggle) {
-
-            glowToggle.addEventListener(
-                "change",
-                event => {
-
-                    this.settings.glowEnabled =
-                        event.target.checked;
-
-                    document.body.classList.toggle(
-                        "glow-disabled",
-                        !event.target.checked
-                    );
-
-                    this.savePreferences();
-
-                }
-            );
-
-        }
-
-
-        /* Close modals by clicking backdrop */
-
-        document.querySelectorAll(
-            ".modal-backdrop"
-        ).forEach(backdrop => {
-
-            backdrop.addEventListener(
-                "click",
-                event => {
-
-                    if (event.target === backdrop) {
-
-                        backdrop.classList.remove("active");
-
-                    }
-
-                }
-            );
-
+        document.getElementById("display-mode-btn")?.addEventListener("click", () => {
+            this.toggleDisplayMode();
         });
 
+        document.getElementById("fullscreen-btn")?.addEventListener("click", () => {
+            this.toggleFullscreen();
+        });
 
-        /* Close buttons */
+        document.getElementById("matrix-toggle")?.addEventListener("change", event => {
+            this.settings.matrixEnabled = event.target.checked;
+            this.modules.matrix?.setEnabled?.(event.target.checked);
+            this.savePreferences();
+        });
 
-        document.querySelectorAll(
-            "[data-close-modal]"
-        ).forEach(button => {
+        document.getElementById("visualizer-toggle")?.addEventListener("change", event => {
+            this.settings.visualizerEnabled = event.target.checked;
+            this.modules.visualizer?.setEnabled?.(event.target.checked);
+            this.savePreferences();
+        });
 
-            button.addEventListener(
-                "click",
-                () => {
+        document.getElementById("glow-toggle")?.addEventListener("change", event => {
+            this.settings.glowEnabled = event.target.checked;
+            document.body.classList.toggle("glow-disabled", !event.target.checked);
+            this.savePreferences();
+        });
 
-                    const modal =
-                        button.closest(".modal-backdrop");
-
-                    modal?.classList.remove("active");
-
+        document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+            backdrop.addEventListener("click", event => {
+                if (event.target === backdrop) {
+                    backdrop.classList.remove("active");
+                    backdrop.setAttribute("aria-hidden", "true");
                 }
-            );
-
+            });
         });
 
-    },
-
-
-    /* =====================================
-       THEME MANAGEMENT
-    ===================================== */
-
-    setTheme(theme) {
-
-        const availableThemes = [
-            "cyberpunk",
-            "cozy",
-            "matrix",
-            "minimal"
-        ];
-
-        if (!availableThemes.includes(theme)) {
-
-            console.warn("Unknown theme:", theme);
-
-            return;
-
-        }
-
-        document.body.dataset.theme = theme;
-
-        this.settings.theme = theme;
-
-        document.querySelectorAll(
-            "[data-theme-choice]"
-        ).forEach(button => {
-
-            const selected =
-                button.dataset.themeChoice === theme;
-
-            button.classList.toggle(
-                "active",
-                selected
-            );
-
-            button.setAttribute(
-                "aria-pressed",
-                String(selected)
-            );
-
-        });
-
-        this.savePreferences();
-
-        this.showToast(
-            `${this.capitalize(theme)} theme activated`
-        );
-
-    },
-
-
-    /* =====================================
-       DISPLAY MODE
-    ===================================== */
-
-    initializeDisplayMode() {
-
-        document.body.classList.toggle(
-            "display-mode",
-            this.settings.displayMode
-        );
-
-    },
-
-
-    toggleDisplayMode() {
-
-        this.settings.displayMode =
-            !this.settings.displayMode;
-
-        document.body.classList.toggle(
-            "display-mode",
-            this.settings.displayMode
-        );
-
-        this.savePreferences();
-
-        this.showToast(
-            this.settings.displayMode
-                ? "Display mode enabled"
-                : "Display mode disabled"
-        );
-
-    },
-
-
-    /* =====================================
-       FULLSCREEN
-    ===================================== */
-
-    async toggleFullscreen() {
-
-        try {
-
-            if (!document.fullscreenElement) {
-
-                await document.documentElement.requestFullscreen();
-
-                this.showToast("Fullscreen enabled");
-
-            } else {
-
-                await document.exitFullscreen();
-
-                this.showToast("Fullscreen disabled");
-
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                document.querySelectorAll(".modal-backdrop.active").forEach(modal => {
+                    modal.classList.remove("active");
+                    modal.setAttribute("aria-hidden", "true");
+                });
             }
-
-        } catch (error) {
-
-            console.warn(
-                "Fullscreen unavailable:",
-                error
-            );
-
-            this.showToast(
-                "Fullscreen is not available"
-            );
-
-        }
-
+        });
     },
-
-
-    /* =====================================
-       KEYBOARD SHORTCUTS
-    ===================================== */
 
     initializeKeyboardShortcuts() {
+        document.addEventListener("keydown", event => {
+            const target = event.target;
 
-        document.addEventListener(
-            "keydown",
-            event => {
+            if (
+                target instanceof HTMLElement &&
+                target.matches("input, textarea, select, button")
+            ) return;
 
-                if (
-                    event.target.matches(
-                        "input, textarea, select"
-                    )
-                ) return;
+            if (event.ctrlKey || event.metaKey || event.altKey) return;
 
-
-                /* F = Fullscreen */
-
-                if (
-                    event.key.toLowerCase() === "f" &&
-                    !event.ctrlKey &&
-                    !event.metaKey
-                ) {
-
-                    this.toggleFullscreen();
-
-                }
-
-
-                /* Escape = Exit display mode */
-
-                if (event.key === "Escape") {
-
-                    if (this.settings.displayMode) {
-
-                        this.settings.displayMode = false;
-
-                        document.body.classList.remove(
-                            "display-mode"
-                        );
-
-                        this.savePreferences();
-
-                    }
-
-                }
-
-
-                /* D = Display mode */
-
-                if (
-                    event.key.toLowerCase() === "d" &&
-                    !event.ctrlKey &&
-                    !event.metaKey
-                ) {
-
-                    this.toggleDisplayMode();
-
-                }
-
+            if (event.key.toLowerCase() === "f") {
+                this.toggleFullscreen();
             }
 
-        );
-
+            if (event.key.toLowerCase() === "d") {
+                this.toggleDisplayMode();
+            }
+        });
     },
 
+    setTheme(theme) {
+        const themes = ["cyberpunk", "cozy", "matrix", "minimal"];
 
-    /* =====================================
-       TOAST NOTIFICATIONS
-    ===================================== */
+        if (!themes.includes(theme)) return;
 
-    showToast(message, duration = 2500) {
+        this.settings.theme = theme;
+        document.body.dataset.theme = theme;
 
-        const toast =
-            document.getElementById("toast");
+        document.querySelectorAll("[data-theme-choice]").forEach(button => {
+            const active = button.dataset.themeChoice === theme;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
 
+        this.savePreferences();
+        this.showToast(`${theme.charAt(0).toUpperCase() + theme.slice(1)} theme activated`);
+    },
+
+    getSettings() {
+        return { ...this.settings };
+    },
+
+    updateSettings(newSettings) {
+        this.settings = {
+            ...this.settings,
+            ...newSettings
+        };
+
+        this.applySettings();
+        this.savePreferences();
+    },
+
+    setWidgetVisibility(name, visible) {
+        const ids = {
+            weather: "weather-widget",
+            calendar: "calendar-widget",
+            music: "music-widget"
+        };
+
+        const element = document.getElementById(ids[name]);
+
+        if (element) {
+            element.classList.toggle("widget-hidden", !visible);
+        }
+    },
+
+    setBrightness(value) {
+        const brightness = Math.min(100, Math.max(50, Number(value) || 100));
+        document.documentElement.style.setProperty(
+            "--screen-brightness",
+            `${brightness}%`
+        );
+
+        document.body.style.filter = `brightness(${brightness}%)`;
+    },
+
+    setScreenDimming(enabled) {
+        document.body.classList.toggle("screen-dimming", Boolean(enabled));
+    },
+
+    resetSettings() {
+        this.settings = { ...DEFAULT_SETTINGS };
+        this.applySettings();
+        this.savePreferences();
+
+        this.modules.clock?.set24Hour?.(false);
+        this.modules.clock?.setShowSeconds?.(true);
+        this.modules.matrix?.setEnabled?.(false);
+        this.modules.visualizer?.setEnabled?.(true);
+
+        const controls = {
+            "24-hour-toggle": false,
+            "seconds-toggle": true,
+            "show-weather": true,
+            "show-calendar": true,
+            "show-music": true,
+            "screen-dimming": false,
+            "brightness-control": 100
+        };
+
+        for (const [id, value] of Object.entries(controls)) {
+            const element = document.getElementById(id);
+            if (!element) continue;
+
+            if (element.type === "checkbox") {
+                element.checked = value;
+            } else {
+                element.value = value;
+            }
+        }
+
+        this.showToast("Settings restored to default.");
+    },
+
+    toggleDisplayMode() {
+        this.settings.displayMode = !this.settings.displayMode;
+
+        document.body.classList.toggle(
+            "display-mode",
+            this.settings.displayMode
+        );
+
+        this.savePreferences();
+    },
+
+    async toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (error) {
+            console.warn("Fullscreen unavailable:", error);
+            this.showToast("Fullscreen is unavailable.");
+        }
+    },
+
+    showToast(message, duration = 2600) {
+        const toast = document.getElementById("toast");
         if (!toast) return;
 
         toast.textContent = message;
-
         toast.classList.add("show");
 
         clearTimeout(this.toastTimeout);
 
         this.toastTimeout = setTimeout(() => {
-
             toast.classList.remove("show");
-
         }, duration);
-
     },
 
-
-    /* =====================================
-       TOOLTIPS
-    ===================================== */
-
-    initializeTooltips() {
-
-        document.querySelectorAll(
-            "[data-tooltip]"
-        ).forEach(element => {
-
-            element.setAttribute(
-                "title",
-                element.dataset.tooltip
-            );
-
+    destroy() {
+        Object.values(this.modules).forEach(module => {
+            module?.destroy?.();
         });
-
-    },
-
-
-    /* =====================================
-       UTILITY
-    ===================================== */
-
-    capitalize(value) {
-
-        return value.charAt(0).toUpperCase() +
-            value.slice(1);
-
     }
-
 };
 
-
-/* =========================================
-   START APPLICATION
-========================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        AmbientDesk.init();
-
-    }
-);
-
-
-/* =========================================
-   GLOBAL ACCESS
-========================================= */
-
 window.AmbientDesk = AmbientDesk;
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => AmbientDesk.init());
+} else {
+    AmbientDesk.init();
+}
