@@ -1,28 +1,29 @@
-// ============================================
-// AmbientDesk — Theme Sharing
-// ============================================
+/* =========================================
+   AMBIENTDESK — THEME SHARING
+   File: js/sharing.js
+========================================= */
 
 export function initSharing(app) {
-    const backdrop = document.getElementById("share-backdrop");
+    const $ = id => document.getElementById(id);
 
-    const themeName = document.getElementById("share-theme-name");
-    const shareUrl = document.getElementById("share-url");
+    const backdrop = $("share-backdrop");
+    const shareButton = $("share-btn");
+    const closeButton = $("close-share");
+    const copyButton = $("copy-share-url");
 
-    const copyButton = document.getElementById("copy-share-url");
-    const feedback = document.getElementById("share-feedback");
-    const qrContainer = document.getElementById("share-qr");
-
-    const shareButton = document.getElementById("share-button");
-    const closeButton = document.getElementById("close-share");
+    const themeName = $("share-theme-name");
+    const shareUrl = $("share-url");
+    const feedback = $("share-feedback");
+    const qrContainer = $("share-qr");
 
     const themeNames = {
-        cyberpunk: "Cyberpunk",
-        cozy: "Cozy",
-        matrix: "Matrix",
-        minimal: "Minimal"
+        cyberpunk: "Cyberpunk Atmosphere",
+        cozy: "Cozy Atmosphere",
+        matrix: "Matrix Atmosphere",
+        minimal: "Minimal Atmosphere"
     };
 
-    function createShareURL() {
+    function createURL() {
         const url = new URL(window.location.href);
 
         url.searchParams.set(
@@ -33,9 +34,7 @@ export function initSharing(app) {
         return url.toString();
     }
 
-    function openShare() {
-        if (!backdrop) return;
-
+    function open() {
         const theme = document.body.dataset.theme || "cyberpunk";
 
         if (themeName) {
@@ -43,7 +42,7 @@ export function initSharing(app) {
         }
 
         if (shareUrl) {
-            shareUrl.value = createShareURL();
+            shareUrl.value = createURL();
         }
 
         if (feedback) {
@@ -51,67 +50,54 @@ export function initSharing(app) {
         }
 
         if (qrContainer) {
-            qrContainer.replaceChildren();
-
-            const note = document.createElement("p");
-            note.textContent = "Share the URL to open this theme on another device.";
-            qrContainer.appendChild(note);
+            qrContainer.textContent =
+                "Copy the link and send it to someone to share this theme.";
         }
 
-        backdrop.classList.add("active");
-        backdrop.setAttribute("aria-hidden", "false");
+        backdrop?.classList.add("active");
+        backdrop?.setAttribute("aria-hidden", "false");
     }
 
-    function closeShare() {
+    function close() {
         backdrop?.classList.remove("active");
         backdrop?.setAttribute("aria-hidden", "true");
     }
 
-    async function copyURL() {
-        const value = shareUrl?.value;
-
-        if (!value) return;
+    async function copy() {
+        if (!shareUrl?.value) return;
 
         try {
-            await navigator.clipboard.writeText(value);
+            await navigator.clipboard.writeText(shareUrl.value);
 
             if (feedback) {
-                feedback.textContent = "Link copied!";
+                feedback.textContent = "Link copied successfully!";
             }
-        } catch {
+        } catch (error) {
+            shareUrl.focus();
             shareUrl.select();
 
             if (feedback) {
-                feedback.textContent = "Select and copy the link.";
+                feedback.textContent = "Press Ctrl+C to copy the selected link.";
             }
         }
     }
 
-    shareButton?.addEventListener("click", openShare);
-    closeButton?.addEventListener("click", closeShare);
-    copyButton?.addEventListener("click", copyURL);
+    shareButton?.addEventListener("click", open);
+    closeButton?.addEventListener("click", close);
+    copyButton?.addEventListener("click", copy);
 
-    backdrop?.addEventListener("click", (event) => {
-        if (event.target === backdrop) {
-            closeShare();
-        }
+    backdrop?.addEventListener("click", event => {
+        if (event.target === backdrop) close();
     });
 
-    // Apply a theme received through a shared URL.
-    const requestedTheme = new URLSearchParams(window.location.search).get("theme");
-
-    if (requestedTheme && themeNames[requestedTheme]) {
-        app.setTheme(requestedTheme);
-    }
-
     return {
-        open: openShare,
-        close: closeShare,
+        open,
+        close,
 
         destroy() {
-            shareButton?.removeEventListener("click", openShare);
-            closeButton?.removeEventListener("click", closeShare);
-            copyButton?.removeEventListener("click", copyURL);
+            shareButton?.removeEventListener("click", open);
+            closeButton?.removeEventListener("click", close);
+            copyButton?.removeEventListener("click", copy);
         }
     };
 }
