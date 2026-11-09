@@ -107,7 +107,11 @@ export function initMusic() {
         if (!elements.playlist) return;
 
         elements.playlist.replaceChildren();
+const count = document.getElementById("playlist-count");
 
+if (count) {
+    count.textContent = `${playlist.length} TRACK${playlist.length === 1 ? "" : "S"}`;
+}
         if (playlist.length === 0) {
             const empty = document.createElement("p");
             empty.className = "playlist-empty";
